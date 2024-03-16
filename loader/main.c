@@ -53,6 +53,14 @@
 
 //#define ENABLE_DEBUG
 
+void *__wrap_calloc(uint32_t nmember, uint32_t size) { return vglCalloc(nmember, size); }
+void __wrap_free(void *addr) { vglFree(addr); };
+void *__wrap_malloc(uint32_t size) { return vglMalloc(size); };
+void *__wrap_memalign(uint32_t alignment, uint32_t size) { return vglMemalign(alignment, size); };
+void *__wrap_realloc(void *ptr, uint32_t size) { return vglRealloc(ptr, size); };
+void *__wrap_memcpy (void *dst, const void *src, size_t num) { return sceClibMemcpy(dst, src, num); };
+void *__wrap_memset (void *ptr, int value, size_t num) { return sceClibMemset(ptr, value, num); };
+
 int _opensles_user_freq = 44100;
 
 static char fake_vm[0x1000];
@@ -64,16 +72,8 @@ unsigned int _pthread_stack_default_user = 1 * 1024 * 1024;
 
 so_module main_mod;
 
-void *__wrap_memcpy(void *dest, const void *src, size_t n) {
-	return sceClibMemcpy(dest, src, n);
-}
-
 void *__wrap_memmove(void *dest, const void *src, size_t n) {
 	return sceClibMemmove(dest, src, n);
-}
-
-void *__wrap_memset(void *s, int c, size_t n) {
-	return sceClibMemset(s, c, n);
 }
 
 int debugPrintf(char *fmt, ...) {
@@ -952,7 +952,6 @@ static NameToMethodID name_to_method_ids[] = {
 	{ "getLanguage", GET_LANGUAGE },
 	{ "loadRawResourceBuffer", LOAD_RAW_RESOURCE_BUFFER },
 	{ "loadTexture", LOAD_TEXTURE},
-	{ "loadTexture", LOAD_TEXTURE},
 	{ "IsResourceDLExec", IS_RESOURCE_DL_EXEC},
 	{ "IsFileCheckExec", IS_FILE_CHECK_EXEC},
 	{ "IsResourceDLSuccess", IS_RESOURCE_DL_SUCCESS},
@@ -1311,9 +1310,9 @@ uint64_t CallLongMethodV(void *env, void *obj, int methodID, uintptr_t *args) {
 uint64_t CallStaticLongMethodV(void *env, void *obj, int methodID, uintptr_t *args) {
 	switch (methodID) {
 	case GET_TOTAL_MEMORY:
-		return 256 * 1024 * 1024;
+		return 128 * 1024 * 1024;
 	case GET_FREE_MEMORY:
-		return 256 * 1024 * 1024;
+		return 128 * 1024 * 1024;
 	default:
 		break;
 	}
@@ -1399,6 +1398,11 @@ uint8_t *SetByteArrayRegion(void *env, jni_bytearray *array, size_t start, size_
 }
 
 void ReleaseByteArrayElements(void *env, jni_bytearray *obj, void *elems, int mode) {
+	free(obj->elements);
+	free(obj);
+}
+
+void ReleaseIntArrayElements(void *env, jni_intarray *obj, void *elems, int mode) {
 	free(obj->elements);
 	free(obj);
 }
@@ -1564,7 +1568,7 @@ void *real_main(void *argv) {
 	*(uintptr_t *)(fake_env + 0x2E0) = (uintptr_t)GetByteArrayElements;
 	*(uintptr_t *)(fake_env + 0x2EC) = (uintptr_t)GetIntArrayElements;
 	*(uintptr_t *)(fake_env + 0x300) = (uintptr_t)ReleaseByteArrayElements;
-	*(uintptr_t *)(fake_env + 0x30C) = (uintptr_t)ReleaseByteArrayElements;
+	*(uintptr_t *)(fake_env + 0x30C) = (uintptr_t)ReleaseIntArrayElements;
 	*(uintptr_t *)(fake_env + 0x340) = (uintptr_t)SetByteArrayRegion;
 	*(uintptr_t *)(fake_env + 0x36C) = (uintptr_t)GetJavaVM;
 	

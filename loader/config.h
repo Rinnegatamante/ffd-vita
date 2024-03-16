@@ -5,7 +5,7 @@
 
 #define LOAD_ADDRESS 0x98000000
 
-#define MEMORY_NEWLIB_MB 256
+#define MEMORY_NEWLIB_MB 320
 
 #define DATA_PATH "ux0:data/ffd"
 #define SO_PATH DATA_PATH "/" "libjniproxy.so"
