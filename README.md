@@ -9,7 +9,11 @@ By doing so, it's basically as if we emulate a minimalist Android environment in
 
 ## Changelog
 
-### v1.0
+### v.1.1
+
+- Mitigated crashing issues due to memleaks. When game starts stuttering when casting spells and starting battles, it's suggested to save as soon as possible and restart the app.
+
+### v.1.0
 
 - Initial release.
 
@@ -84,4 +88,5 @@ cmake .. && make
 - TheFloW for the original .so loader.
 - frangarcj for [FF5 Vita](https://github.com/frangarcj/ff5_vita) from which several code snippets had been taken since the two games share the engine.
 - withLogic for testing the homebrew and providing screenshots.
+- Hans for testing the homebrew.
 - Brandonheat8 for the Livearea assets.
