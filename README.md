@@ -9,6 +9,10 @@ By doing so, it's basically as if we emulate a minimalist Android environment in
 
 ## Changelog
 
+### v.1.2
+
+- Fixed an issue causing the game to crash during the final ending scene.
+
 ### v.1.1
 
 - Mitigated crashing issues due to memleaks. When game starts stuttering when casting spells and starting battles, it's suggested to save as soon as possible and restart the app.

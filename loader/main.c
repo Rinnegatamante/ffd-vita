@@ -53,9 +53,23 @@
 
 //#define ENABLE_DEBUG
 
+void *obb_blk = NULL;
+
 void *__wrap_calloc(uint32_t nmember, uint32_t size) { return vglCalloc(nmember, size); }
-void __wrap_free(void *addr) { vglFree(addr); };
-void *__wrap_malloc(uint32_t size) { return vglMalloc(size); };
+void __wrap_free(void *addr) {
+	if (addr != obb_blk) // Prevent freeing the main.obb block
+		vglFree(addr);
+};
+void *__wrap_malloc(uint32_t size) {
+	void *r = vglMalloc(size);
+	if (size > 150 * 1024 * 1024) { // Allocating memory for main.obb
+		if (!r) { // If allocation failed, it means that's not the first main.obb being requested. Pass the reference we took first time
+			return obb_blk;
+		}
+		obb_blk = r; // Taking a reference to the main.obb block to prevent game erroneously wanting copies of this
+	}
+	return r;
+};
 void *__wrap_memalign(uint32_t alignment, uint32_t size) { return vglMemalign(alignment, size); };
 void *__wrap_realloc(void *ptr, uint32_t size) { return vglRealloc(ptr, size); };
 void *__wrap_memcpy (void *dst, const void *src, size_t num) { return sceClibMemcpy(dst, src, num); };
@@ -320,7 +334,7 @@ static char *__ctype_ = (char *)&_ctype_;
 static FILE __sF_fake[0x100][3];
 
 int stat_hook(const char *pathname, void *statbuf) {
-	sceClibPrintf("stat %s\n", pathname);
+	//sceClibPrintf("stat %s\n", pathname);
 	char real_fname[128];
 	sprintf(real_fname, "%s.mp3", pathname);
 	
@@ -380,7 +394,7 @@ int nanosleep_hook(const struct timespec *req, struct timespec *rem) {
 FILE *AAssetManager_open(void *mgr, const char *fname, int mode) {
 	char full_fname[256];
 	sprintf(full_fname, "ux0:data/ffd/assets/%s", fname);
-	//printf("AAssetManager_open %s\n", full_fname);
+	//sceClibPrintf("AAssetManager_open %s\n", full_fname);
 	return fopen(full_fname, "rb");
 }
 
