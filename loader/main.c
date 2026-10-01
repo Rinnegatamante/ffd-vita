@@ -138,7 +138,7 @@ int ret1(void) {
 	return 1;
 }
 
-int clock_gettime(int clk_ik, struct timespec *t) {
+int clock_gettime(clockid_t clk_ik, struct timespec *t) {
 	struct timeval now;
 	int rv = gettimeofday(&now, NULL);
 	if (rv)
@@ -1399,14 +1399,14 @@ void CallVoidMethodV(void *env, void *obj, int methodID, uintptr_t *args) {
 	}
 }
 
-uint8_t *NewByteArray(void *env, size_t length) {
+jni_bytearray *NewByteArray(void *env, size_t length) {
 	jni_bytearray *result = malloc(sizeof(jni_bytearray));
 	result->elements = malloc(length);
 	result->size = length;
 	return result;
 }
 
-uint8_t *SetByteArrayRegion(void *env, jni_bytearray *array, size_t start, size_t len, uint8_t *buf) {
+jni_bytearray *SetByteArrayRegion(void *env, jni_bytearray *array, size_t start, size_t len, uint8_t *buf) {
 	memcpy(array->elements, &buf[start], len);
 	return array;
 }
@@ -1662,7 +1662,7 @@ void *real_main(void *argv) {
 		glViewport(0, 0, SCREEN_W, SCREEN_H);
 		glBindTexture(GL_TEXTURE_2D, borders_tex);
 		setup_2d_draw(bg_attributes, 0.0f, 0.0f, SCREEN_W, SCREEN_H);
-		vglDrawObjects(GL_TRIANGLE_STRIP, 4, GL_TRUE);
+		vglDrawObjects(GL_TRIANGLE_STRIP, 4);
 		vglSwapBuffers(is_edit_text_exec());
 	}
 
